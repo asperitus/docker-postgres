@@ -4,33 +4,20 @@ set -x
 
 [ -z "$POSTGRES_USER" ] && POSTGRES_USER="postgres"
 [ -z "$POSTGRES_PASSWORD" ] && POSTGRES_PASSWORD="postgres"
-[ -z "$PORT" ] && PORT=5432
 
-export POSTGRES_USER POSTGRES_PASSWORD PORT
+PG_PORT=5432
 
-function define(){
-    IFS='\n' read -r -d '' ${1} || true;
-}
+export POSTGRES_USER POSTGRES_PASSWORD PG_PORT
 
-define POSTGRES_CONFIG <<EOF
-{
-    "allocated_storage": 2,
-    "database": "postgres",
-    "hostname": "${CF_INSTANCE_IP}",
-    "password": "${POSTGRES_PASSWORD}",
-    "port": ${CF_INSTANCE_PORT},
-    "uri": "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${CF_INSTANCE_IP}:${CF_INSTANCE_PORT}/postgres",
-    "username": "${POSTGRES_USER}",
-    "uuid": "${CF_INSTANCE_GUI}"
-}
-EOF
-
-export POSTGRES_CONFIG
-
+#
+export SERVER_HOST=0.0.0.0
+export SERVER_PORT=${PG_PORT}
 #
 env
 
 #
-docker-entrypoint.sh -p $PORT
+docker-entrypoint.sh $@ &
+
+tunnel server -v --proxy http://example.com --port $PORT
 
 echo "Done"
