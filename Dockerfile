@@ -128,12 +128,13 @@ RUN mkdir -p "$PGDATA" && chown -R postgres:postgres "$PGDATA" && chmod 777 "$PG
 VOLUME /var/lib/postgresql/data
 
 COPY docker-entrypoint.sh /usr/local/bin/
-RUN ln -s usr/local/bin/docker-entrypoint.sh / # backwards compat
+RUN ln -s usr/local/bin/docker-entrypoint.sh \
+    && chmod a+x /usr/local/bin/docker-entrypoint.sh
 
 ####
 
 ENV PORT 8080
-
+EXPOSE 8080
 #
 RUN apt-get update && apt-get install -y wget \
     && set -ex \
@@ -146,5 +147,4 @@ RUN chmod a+x pg.sh
 
 ENTRYPOINT ["/pg.sh"]
 
-EXPOSE 8080
 CMD ["postgres"]
